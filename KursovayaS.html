@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Черемховская городская больница</title>
+    <style>
+        :root {
+            --bg-dark: #0a1128;
+            --bg-card: #1c2541;
+            --accent: #3a86ff;
+            --text-main: #ffffff;
+            --text-muted: #8d99ae;
+            --border: #2a3555;
+            --error: #ff6b6b;
+            --success: #2ecc71;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg-dark); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
+
+        @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+
+        header {
+            background: var(--bg-card); padding: 15px 20px;
+            position: sticky; top: 0; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .logo { font-size: 1.1rem; font-weight: bold; color: var(--accent); cursor: pointer; }
+        nav { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+        nav a, .user-badge {
+            color: var(--text-muted); text-decoration: none;
+            font-size: 0.9rem; padding: 5px 0; transition: color 0.25s;
+            cursor: pointer; white-space: nowrap; position: relative;
+        }
+        nav a::after {
+            content: ''; position: absolute; left: 0; bottom: -2px;
+            width: 0; height: 2px; background: var(--accent); transition: width 0.3s ease;
+        }
+        nav a:hover { color: var(--accent); }
+        nav a:hover::after { width: 100%; }
+        nav a.active { color: var(--accent); }
+        nav a.active::after { width: 100%; }
+        .user-badge { background: #232d52; padding: 5px 12px; border-radius: 20px; color: var(--accent); font-size: 0.8rem; cursor: default; }
+        .logout-btn { background: transparent; border: 1px solid var(--error); color: var(--error); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: all 0.25s; }
+        .logout-btn:hover { background: var(--error); color: white; }
+
+        .page { display: none; }
+        .page.active { display: block; animation: fadeSlideIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards; }
+
+        .hero {
+            padding: 40px 20px; text-align: center;
+            background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-card) 100%);
+        }
+        .hero h1 { font-size: 1.8rem; margin-bottom: 10px; line-height: 1.2; }
+        .hero .subtitle { color: var(--text-muted); font-size: 1rem; margin-bottom: 20px; }
+        .hero .address-block {
+            background: rgba(255,255,255,0.05); border-radius: 10px;
+            padding: 15px; max-width: 600px; margin: 0 auto 25px;
+            font-size: 0.9rem; text-align: left;
+        }
+        .hero .address-block p { margin-bottom: 6px; color: var(--text-muted); }
+        .hero .address-block strong { color: var(--text-main); }
+        .btn {
+            background: var(--accent); color: white; padding: 12px 24px; border: none;
+            border-radius: 8px; font-size: 1rem; cursor: pointer; text-decoration: none;
+            display: inline-block; transition: background 0.25s, transform 0.2s;
+        }
+        .btn:hover { background: #2563eb; transform: translateY(-2px); }
+        .btn-sm { padding: 8px 16px; font-size: 0.85rem; }
+
+        .features {
+            padding: 40px 20px; display: grid; grid-template-columns: 1fr; gap: 20px;
+        }
+        .card {
+            background: var(--bg-card); padding: 25px; border-radius: 12px;
+            border-left: 4px solid var(--accent); box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            text-decoration: none; color: inherit; cursor: pointer;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.35); }
+        .card h3 { margin-bottom: 10px; font-size: 1.1rem; }
+        .card p { color: var(--text-muted); font-size: 0.9rem; }
+
+        .info-section {
+            max-width: 900px; margin: 0 auto; padding: 0 20px 40px;
+        }
+        .info-block {
+            background: var(--bg-card); border-radius: 14px; padding: 25px;
+            margin-bottom: 25px; border: 1px solid var(--border); animation: scaleIn 0.4s ease;
+        }
+        .info-block h2 {
+            color: var(--accent); font-size: 1.25rem; margin-bottom: 15px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .info-block ul { list-style: none; padding: 0; }
+        .info-block ul li {
+            padding: 6px 0 6px 22px; position: relative;
+            color: var(--text-muted); font-size: 0.9rem;
+        }
+        .info-block ul li::before {
+            content: '•'; position: absolute; left: 6px; color: var(--accent); font-weight: bold;
+        }
+
+        .departments-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            max-width: 900px; margin: 0 auto; padding: 0 20px 20px;
+        }
+        .dept-item {
+            background: var(--bg-card); padding: 10px 14px; border-radius: 8px;
+            font-size: 0.85rem; border-left: 3px solid var(--accent);
+            transition: transform 0.2s;
+        }
+        .dept-item:hover { transform: translateX(4px); }
+        .pagination {
+            display: flex; justify-content: center; gap: 10px; padding: 0 20px 40px;
+        }
+        .pagination button {
+            background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted);
+            padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.25s;
+        }
+        .pagination button.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .pagination button:hover:not(.active) { border-color: var(--accent); }
+
+        .table-wrapper { padding: 0 20px 40px; max-width: 900px; margin: 0 auto; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 12px; overflow: hidden; font-size: 0.9rem; }
+        th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #232d52; color: var(--accent); font-size: 0.85rem; text-transform: uppercase; }
+        tr { transition: background 0.2s; }
+        tr:hover { background: #232d52; }
+
+        .auth-wrap { min-height: calc(100vh - 180px); display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+        .auth-box { background: var(--bg-card); padding: 35px 30px; border-radius: 14px; width: 100%; max-width: 450px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); animation: scaleIn 0.35s ease; }
+        .auth-box h1 { font-size: 1.6rem; margin-bottom: 8px; text-align: center; }
+        .auth-box p.hint { color: var(--text-muted); font-size: 0.85rem; text-align: center; margin-bottom: 25px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: var(--text-muted); }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 12px 14px; border-radius: 8px; border: 2px solid transparent;
+            background: #232d52; color: white; font-size: 1rem; transition: border 0.25s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--accent);
+        }
+        .form-group textarea { resize: vertical; min-height: 70px; }
+        .btn-submit {
+            width: 100%; padding: 13px; background: var(--accent); color: white;
+            border: none; border-radius: 8px; font-size: 1rem; font-weight: 600;
+            cursor: pointer; margin-top: 8px; transition: background 0.25s;
+        }
+        .btn-submit:hover { background: #2563eb; }
+        .message { margin-top: 18px; text-align: center; font-size: 0.9rem; min-height: 1.2em; }
+        .message.error { color: var(--error); } .message.success { color: var(--success); }
+        .switch-auth { margin-top: 20px; padding-top: 20px; border-top: 1px solid #2a3555; text-align: center; font-size: 0.85rem; color: var(--text-muted); }
+        .switch-auth a { color: var(--accent); cursor: pointer; text-decoration: underline; }
+        .demo-hint { margin-top: 20px; padding-top: 20px; border-top: 1px solid #2a3555; font-size: 0.8rem; color: var(--text-muted); text-align: center; }
+        .demo-hint code { background: #232d52; padding: 2px 6px; border-radius: 4px; color: var(--accent); }
+
+        .dashboard { max-width: 1100px; margin: 0 auto; padding: 20px 20px 40px; }
+        .dashboard h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        .dashboard .role-tag { display: inline-block; background: var(--accent); color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; margin-bottom: 25px; }
+        .dashboard .role-tag.admin { background: #e67e22; }
+        .info-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px; }
+        .info-card { background: var(--bg-card); padding: 18px; border-radius: 10px; border: 1px solid var(--border); }
+        .info-card .label { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px; }
+        .info-card .value { font-size: 1rem; font-weight: 600; }
+
+        .section-title {
+            font-size: 1.2rem; color: var(--accent); margin: 30px 0 15px;
+            padding-bottom: 8px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+        }
+        .appointment-item, .record-item {
+            background: var(--bg-card); padding: 15px; border-radius: 10px; margin-bottom: 10px;
+            border-left: 3px solid var(--accent); animation: fadeSlideIn 0.3s ease;
+        }
+        .appointment-item .date, .record-item .date { color: var(--accent); font-size: 0.85rem; margin-bottom: 4px; }
+        .appointment-item .doctor, .record-item .doctor { font-weight: 600; margin-bottom: 4px; }
+        .appointment-item .details, .record-item .details { color: var(--text-muted); font-size: 0.85rem; }
+        .empty-state { text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.9rem; }
+        .btn-danger { background: transparent; border: 1px solid var(--error); color: var(--error); padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: all 0.25s; margin-top: 10px; }
+        .btn-danger:hover { background: var(--error); color: white; }
+        .btn-edit { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: all 0.25s; margin-top: 10px; margin-right: 8px; }
+        .btn-edit:hover { background: var(--accent); color: white; }
+
+        .booking-form { background: var(--bg-card); padding: 25px; border-radius: 12px; max-width: 500px; margin: 0 auto 30px; }
+        .booking-form .form-group { margin-bottom: 15px; }
+
+        .doctor-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 12px; overflow: hidden; font-size: 0.9rem; margin-top: 10px; }
+        .doctor-table th, .doctor-table td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+        .doctor-table th { background: #232d52; color: var(--accent); font-size: 0.8rem; }
+        .doctor-table tr { transition: background 0.2s; }
+        .doctor-table tr:hover { background: #232d52; }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 1000; align-items: center;
+            justify-content: center; padding: 20px; animation: fadeIn 0.25s ease;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--bg-card); padding: 30px; border-radius: 14px;
+            max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: scaleIn 0.3s ease;
+        }
+        .modal h2 { color: var(--accent); margin-bottom: 15px; font-size: 1.3rem; }
+        .modal .modal-close { float: right; background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+        .modal .modal-close:hover { color: var(--error); }
+        .modal .record-field { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+        .modal .record-field:last-child { border-bottom: none; }
+        .modal .record-field .label { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px; }
+        .modal .record-field .value { font-size: 0.95rem; }
+
+        footer { text-align: center; padding: 20px; background: var(--bg-card); color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; }
+
+        @media (min-width: 768px) {
+            .features { grid-template-columns: repeat(3, 1fr); padding: 60px 10%; }
+            .hero h1 { font-size: 2.4rem; }
+            .hero { padding: 60px 20px; }
+            .info-grid { grid-template-columns: repeat(3, 1fr); }
+            .dashboard h1 { font-size: 2.2rem; }
+            .departments-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 480px) {
+            .departments-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo" data-page="home">🏥 Черемховская городская больница</div>
+        <nav id="mainNav">
+            <a data-page="home" class="active">Главная</a>
+            <a data-page="doctors">Врачи</a>
+            <a data-page="schedule">Расписание</a>
+            <a data-page="departments">Отделения</a>
+            <a data-page="hospital">Больница</a>
+            <a data-page="dashboard" id="navDashboard" style="display:none;">Личный кабинет</a>
+            <a data-page="auth" id="navAuth">Вход / Регистрация</a>
+            <span class="user-badge" id="userBadge" style="display:none;"></span>
+            <button class="logout-btn" id="logoutBtn" style="display:none;">Выйти</button>
+        </nav>
+    </header>
+
+    <!-- ГЛАВНАЯ -->
+    <div class="page active" id="page-home">
+        <section class="hero">
+            <h1>г. Черемхово<br>Черемховская городская больница</h1>
+            <div class="address-block">
+                <p><strong>График работы:</strong> с 8:00 до 15:06 (кроме субботы и воскресенья)</p>
+                <p><strong>Почтовый адрес:</strong> г. Иркутск, ул. Куйбышева, 28, Черемхово</p>
+                <p><strong>Приемная главного врача:</strong> +7 (39546) 5-06-23</p>
+                <p><strong>Регистратура:</strong> +7 (39546) 5-25-77</p>
+                <p><strong>Коммутатор:</strong> +7 (39546) 5-32-04</p>
+            </div>
+            <button class="btn" data-page="auth">Войти в систему</button>
+        </section>
+
+        <!-- Полезные разделы -->
+        <section class="features">
+            <div class="card" data-page="doctors"><h3>👨‍⚕️ Врачи</h3><p>Список специалистов и график приёма.</p></div>
+            <div class="card" data-page="schedule"><h3>📅 Расписание</h3><p>Актуальное расписание на неделю.</p></div>
+            <div class="card" data-page="hospital"><h3>🏥 О больнице</h3><p>Справочные номера, план эвакуации, права пациентов.</p></div>
+        </section>
+
+        <!-- Полезная информация -->
+        <div class="info-section">
+            <div class="info-block">
+                <h2>📋 Полезная информация</h2>
+                <ul>
+                    <li><a href="#" style="color:var(--accent);text-decoration:none;">Государственные гарантии бесплатной медицинской помощи</a></li>
+                    <li><a href="#" style="color:var(--accent);text-decoration:none;">Платные услуги</a></li>
+                    <li><a href="#" style="color:var(--accent);text-decoration:none;">Независимая оценка качества</a></li>
+                    <li><a href="#" style="color:var(--accent);text-decoration:none;">Направления</a></li>
+                    <li><a href="#" style="color:var(--accent);text-decoration:none;">Доступная среда</a></li>
+                    <li><a href="#" style="color:var(--accent);text-decoration:none;">Страховые медицинские организации</a></li>
+                    <li><a href="schedule.html" style="color:var(--accent);text-decoration:none;" data-page="schedule">График приема специалистов</a></li>
+                </ul>
+            </div>
+
+            <div class="info-block">
+                <h2>⚖️ Права граждан</h2>
+                <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:12px;">По Федеральному закону от 21.11.2011 №323-ФЗ у граждан есть право на охрану здоровья и медицинскую помощь, в том числе:</p>
+                <ul>
+                    <li>выбирать врачей и медицинскую организацию</li>
+                    <li>получать помощь в условиях, которые соответствуют санитарно-гигиеническим требованиям</li>
+                    <li>проходить профилактические осмотры, диагностику, лечение, медицинскую реабилитацию и консультации у врачей-специалистов</li>
+                    <li>облегчать боль лекарствами и другими доступными методами при болезнях и медицинском вмешательстве</li>
+                    <li>получать информацию о своих правах, обязанностях, состоянии здоровья и иметь доступ к медицинской документации</li>
+                    <li>получать копии и выписки из своих медицинских документов</li>
+                    <li>выбирать людей, которым может быть передана информация о состоянии здоровья</li>
+                    <li>получать лечебное питание, если это лечение проходит в стационарных условиях</li>
+                    <li>иметь гарантию защиты сведений, которые составляют врачебную тайну</li>
+                    <li>давать добровольное согласие или отказываться от медицинского вмешательства</li>
+                    <li>возмещать вред здоровью, который причинили при оказании медицинской помощи</li>
+                    <li>встречаться с адвокатом или законным представителем для защиты своих прав</li>
+                    <li>встречаться со священнослужителем, проводить религиозные обряды</li>
+                    <li>получать достоверную и своевременную информацию о факторах, которые помогают сохранять здоровье или оказывают на него вредное влияние</li>
+                </ul>
+            </div>
+
+            <div class="info-block">
+                <h2>📌 Обязанности граждан</h2>
+                <ul>
+                    <li>Заботиться о своём здоровье</li>
+                    <li>Проходить медицинские осмотры в случаях, которые предусмотрены законодательством РФ</li>
+                    <li>Проходить медицинское обследование и лечение и заниматься профилактикой этих заболеваний в случаях, когда заболевание опасно для окружающих и когда это предусмотрено законодательством РФ</li>
+                    <li>Соблюдать режим лечения и правила поведения в медицинских организациях, в том числе в период временной нетрудоспособности</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ОТДЕЛЕНИЯ -->
+    <div class="page" id="page-departments">
+        <h1 style="padding:40px 20px 10px;text-align:center;font-size:1.8rem;">Отделения больницы</h1>
+        <p style="text-align:center;color:var(--text-muted);padding:0 20px 20px;font-size:0.95rem;">34 отделения — полный список</p>
+        <div class="departments-grid" id="departmentsGrid"></div>
+        <div class="pagination" id="departmentsPagination"></div>
+    </div>
+
+    <!-- ВРАЧИ -->
+    <div class="page" id="page-doctors">
+        <h1 style="padding:40px 20px 10px;text-align:center;font-size:1.8rem;">Наши врачи</h1>
+        <p style="text-align:center;color:var(--text-muted);padding:0 20px 20px;font-size:0.95rem;">15 специалистов</p>
+        <div class="search-box" style="padding:0 20px 20px;max-width:600px;margin:0 auto;">
+            <input type="text" id="searchDoctors" placeholder="🔍 Поиск по имени или специальности..." style="width:100%;padding:12px 15px;border-radius:8px;border:2px solid transparent;background:var(--bg-card);color:white;font-size:1rem;">
+        </div>
+        <div class="doctors-list" id="doctorsList" style="padding:0 20px 40px;display:grid;grid-template-columns:1fr;gap:15px;max-width:1000px;margin:0 auto;"></div>
+        <p class="no-result" id="noResultDoctors" style="text-align:center;color:var(--text-muted);padding:30px;display:none;">😔 Врачи не найдены.</p>
+    </div>
+
+    <!-- РАСПИСАНИЕ -->
+    <div class="page" id="page-schedule">
+        <h1 style="padding:40px 20px 10px;text-align:center;font-size:1.8rem;">Расписание приёма</h1>
+        <p style="text-align:center;color:var(--text-muted);padding:0 20px 20px;font-size:0.95rem;">Актуальное расписание на неделю</p>
+        <div class="table-wrapper">
+            <table id="scheduleTable"><thead><tr><th>Врач</th><th>Специальность</th><th>Кабинет</th><th>День</th><th>Время</th></tr></thead><tbody id="scheduleBody"></tbody></table>
+        </div>
+    </div>
+
+    <!-- БОЛЬНИЦА -->
+    <div class="page" id="page-hospital">
+        <h1 style="padding:40px 20px 10px;text-align:center;font-size:1.8rem;">О больнице</h1>
+        <p style="text-align:center;color:var(--text-muted);padding:0 20px 20px;font-size:0.95rem;">Контакты, финансирование и безопасность</p>
+        <div class="hospital-info" style="max-width:900px;margin:0 auto;padding:0 20px 40px;">
+            <div id="hospitalAdminBlocks"></div>
+        </div>
+    </div>
+
+    <!-- АВТОРИЗАЦИЯ -->
+    <div class="page" id="page-auth">
+        <div class="auth-wrap">
+            <div class="auth-box">
+                <div id="loginBlock">
+                    <h1>Вход в систему</h1>
+                    <p class="hint">Введите логин и пароль</p>
+                    <form id="loginForm">
+                        <div class="form-group"><label>Логин</label><input type="text" id="loginInput" placeholder="Введите логин" required></div>
+                        <div class="form-group"><label>Пароль</label><input type="password" id="passwordInput" placeholder="Введите пароль" required></div>
+                        <button type="submit" class="btn-submit">Войти</button>
+                    </form>
+                    <div class="message" id="loginMessage"></div>
+                    <div class="switch-auth">Нет аккаунта? <a id="showRegister">Зарегистрироваться</a></div>
+                    <div class="demo-hint">
+                        👤 Пациент: <code>user</code> / <code>1234</code><br>
+                        👨‍⚕️ Главврач: <code>admin</code> / <code>1234</code>
+                    </div>
+                </div>
+                <div id="registerBlock" style="display:none;">
+                    <h1>Регистрация</h1>
+                    <p class="hint">Создайте аккаунт пациента</p>
+                    <form id="registerForm">
+                        <div class="form-group"><label>Логин</label><input type="text" id="regLogin" required></div>
+                        <div class="form-group"><label>Пароль</label><input type="password" id="regPassword" required></div>
+                        <div class="form-group"><label>ФИО</label><input type="text" id="regFio" required></div>
+                        <div class="form-group"><label>Дата рождения</label><input type="date" id="regBirth" required></div>
+                        <button type="submit" class="btn-submit">Зарегистрироваться</button>
+                    </form>
+                    <div class="message" id="registerMessage"></div>
+                    <div class="switch-auth">Уже есть аккаунт? <a id="showLogin">Войти</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ЛИЧНЫЙ КАБИНЕТ -->
+    <div class="page" id="page-dashboard">
+        <div class="dashboard" id="dashboardContent"></div>
+    </div>
+
+    <!-- МОДАЛКИ -->
+    <div class="modal-overlay" id="recordModal"><div class="modal"><button class="modal-close" id="modalClose">×</button><h2 id="modalTitle">Медицинская карта</h2><div id="modalRecordContent"></div></div></div>
+    <div class="modal-overlay" id="recordEditModal"><div class="modal"><button class="modal-close" id="recordEditClose">×</button><h2 id="recordEditTitle">Добавить запись</h2><form id="recordEditForm"><input type="hidden" id="editRecordId"><input type="hidden" id="editRecordLogin"><div class="form-group"><label>Дата</label><input type="date" id="editRecordDate" required></div><div class="form-group"><label>Врач</label><input type="text" id="editRecordDoctor" required></div><div class="form-group"><label>Специальность</label><input type="text" id="editRecordSpecialty" required></div><div class="form-group"><label>Диагноз</label><input type="text" id="editRecordDiagnosis" required></div><div class="form-group"><label>Лечение</label><textarea id="editRecordTreatment" required></textarea></div><div class="form-group"><label>Примечания</label><textarea id="editRecordNotes"></textarea></div><button type="submit" class="btn-submit">Сохранить</button></form></div></div>
+    <div class="modal-overlay" id="appointmentEditModal"><div class="modal"><button class="modal-close" id="appointmentEditClose">×</button><h2>Редактировать запись на приём</h2><form id="appointmentEditForm"><input type="hidden" id="editAppId"><div class="form-group"><label>Пациент</label><select id="editAppPatient" required></select></div><div class="form-group"><label>Врач</label><select id="editAppDoctor" required></select></div><div class="form-group"><label>Дата</label><input type="date" id="editAppDate" required></div><div class="form-group"><label>Время</label><input type="time" id="editAppTime" required></div><button type="submit" class="btn-submit">Сохранить</button></form></div></div>
+
+    <footer>
+        &copy; 2026. Курсовая работа. Рукосуева Софья Сергеевна, 3 курс.<br>
+        г. Черемхово, Черемховская городская больница
+    </footer>
+
+    <script>
+        // ===== 34 ОТДЕЛЕНИЯ =====
+        const DEPARTMENTS = [
+            'Терапевтическое отделение', 'Хирургическое отделение', 'Кардиологическое отделение',
+            'Неврологическое отделение', 'Педиатрическое отделение', 'Акушерско-гинекологическое отделение',
+            'Офтальмологическое отделение', 'Оториноларингологическое отделение', 'Дерматовенерологическое отделение',
+            'Инфекционное отделение', 'Онкологическое отделение', 'Урологическое отделение',
+            'Травматологическое отделение', 'Ортопедическое отделение', 'Эндокринологическое отделение',
+            'Гастроэнтерологическое отделение', 'Пульмонологическое отделение', 'Аллергологическое отделение',
+            'Иммунологическое отделение', 'Психиатрическое отделение', 'Наркологическое отделение',
+            'Фтизиатрическое отделение', 'Стоматологическое отделение', 'Проктологическое отделение',
+            'Нефрологическое отделение', 'Гематологическое отделение', 'Ревматологическое отделение',
+            'Отделение реанимации и интенсивной терапии', 'Отделение скорой медицинской помощи',
+            'Отделение функциональной диагностики', 'Рентгенологическое отделение',
+            'Отделение ультразвуковой диагностики', 'Клинико-диагностическая лаборатория',
+            'Патологоанатомическое отделение'
+        ];
+
+        // ===== ГЕНЕРАЦИЯ 100 ПАЦИЕНТОВ =====
+        const PATIENT_NAMES = [
+            'Смирнов Алексей Владимирович','Иванова Мария Петровна','Кузнецов Дмитрий Андреевич','Попова Елена Сергеевна',
+            'Соколов Артём Игоревич','Лебедева Ольга Викторовна','Козлов Никита Александрович','Новикова Татьяна Юрьевна',
+            'Морозов Сергей Дмитриевич','Волкова Анна Михайловна','Зайцев Павел Олегович','Егорова Наталья Ивановна',
+            'Павлов Роман Сергеевич','Семёнова Ирина Алексеевна','Голубев Максим Дмитриевич','Виноградова Юлия Петровна',
+            'Богданов Андрей Викторович','Воробьёва Светлана Николаевна','Фёдоров Денис Александрович','Михайлова Екатерина Дмитриевна',
+            'Беляев Игорь Владимирович','Тарасова Анастасия Сергеевна','Комаров Артём Олегович','Орлова Марина Игоревна',
+            'Киселёв Никита Андреевич','Макарова Виктория Алексеевна','Андрианов Егор Павлович','Ковалёва Дарья Викторовна',
+            'Ильин Сергей Михайлович','Гусева Алина Романовна','Титов Владислав Игоревич','Кудрявцева Полина Сергеевна',
+            'Баранов Максим Денисович','Филиппова Валерия Андреевна','Давыдов Артур Витальевич','Мельникова Ева Дмитриевна',
+            'Щербаков Иван Александрович','Блинова София Игоревна','Крылов Матвей Сергеевич','Панова Милана Олеговна',
+            'Ершов Кирилл Дмитриевич','Громова Алиса Павловна','Никитин Тимофей Викторович','Соловьёва Ксения Андреевна',
+            'Лазарев Родион Максимович','Трофимова Ева Сергеевна','Пономарёв Лев Игоревич','Соболева Арина Дмитриевна',
+            'Быков Марк Олегович','Дорофеева Варвара Павловна','Максимов Елисей Витальевич','Савельева Софья Романовна',
+            'Захаров Демид Артёмович','Тихонова Мария Максимовна','Ковалёв Лев Сергеевич','Алексеева Ева Денисовна',
+            'Степанов Матвей Игоревич','Яковлева Виктория Андреевна','Гаврилов Артём Павлович','Кириллова Полина Викторовна',
+            'Данилов Кирилл Сергеевич','Белова Анастасия Дмитриевна','Егоров Тимофей Александрович','Николаева Дарья Павловна',
+            'Сергеев Дмитрий Олегович','Владимирова Ксения Игоревна','Петухов Артём Витальевич','Алексеенко Анна Сергеевна',
+            'Морозов Егор Павлович','Иванова Виктория Дмитриевна','Смирнов Максим Олегович','Кузнецова Полина Андреевна',
+            'Попов Артём Викторович','Соколова Дарья Игоревна','Лебедев Денис Александрович','Козлова Анастасия Сергеевна',
+            'Новиков Егор Дмитриевич','Морозова Ксения Павловна','Волков Иван Сергеевич','Зайцева Екатерина Андреевна',
+            'Павлов Никита Игоревич','Семёнова Мария Викторовна','Голубев Андрей Алексеевич','Виноградова Ольга Дмитриевна',
+            'Богданов Сергей Николаевич','Воробьёва Татьяна Сергеевна','Фёдоров Александр Игоревич','Михайлова Наталья Павловна',
+            'Беляев Владимир Дмитриевич','Тарасова Ирина Алексеевна','Комаров Дмитрий Викторович','Орлова Светлана Андреевна'
+        ];
+
+        const DOCTORS = [
+            { name: 'Иванов Иван Иванович', specialty: 'Терапевт', cabinet: '101', experience: '15 лет', schedule: '09:00–14:00', days: 'Пн, Ср, Пт' },
+            { name: 'Петрова Анна Сергеевна', specialty: 'Кардиолог', cabinet: '205', experience: '12 лет', schedule: '10:00–16:00', days: 'Вт, Чт' },
+            { name: 'Сидоров Пётр Петрович', specialty: 'Хирург', cabinet: '310', experience: '20 лет', schedule: '08:00–13:00', days: 'Пн, Ср' },
+            { name: 'Смирнова Ольга Викторовна', specialty: 'Педиатр', cabinet: '112', experience: '8 лет', schedule: '09:00–15:00', days: 'Пн–Пт' },
+            { name: 'Кузнецов Дмитрий Андреевич', specialty: 'Невролог', cabinet: '208', experience: '10 лет', schedule: '11:00–17:00', days: 'Ср, Пт' },
+            { name: 'Морозова Екатерина Игоревна', specialty: 'Офтальмолог', cabinet: '105', experience: '6 лет', schedule: '09:30–14:30', days: 'Вт, Чт' },
+            { name: 'Волков Алексей Николаевич', specialty: 'Стоматолог', cabinet: '207', experience: '18 лет', schedule: '10:00–18:00', days: 'Пн–Пт' },
+            { name: 'Зайцева Мария Павловна', specialty: 'Дерматолог', cabinet: '203', experience: '9 лет', schedule: '09:00–14:00', days: 'Ср, Пт' },
+            { name: 'Павлов Сергей Дмитриевич', specialty: 'ЛОР', cabinet: '301', experience: '14 лет', schedule: '08:30–13:30', days: 'Пн, Ср, Пт' },
+            { name: 'Соколова Анна Викторовна', specialty: 'Эндокринолог', cabinet: '210', experience: '11 лет', schedule: '10:00–15:00', days: 'Вт, Чт' },
+            { name: 'Михайлов Андрей Сергеевич', specialty: 'Уролог', cabinet: '305', experience: '16 лет', schedule: '09:00–14:00', days: 'Пн, Чт' },
+            { name: 'Фёдорова Елена Дмитриевна', specialty: 'Гинеколог', cabinet: '401', experience: '13 лет', schedule: '08:00–14:00', days: 'Пн–Пт' },
+            { name: 'Николаев Игорь Александрович', specialty: 'Травматолог', cabinet: '302', experience: '17 лет', schedule: '09:00–15:00', days: 'Ср, Пт' },
+            { name: 'Андреева Татьяна Петровна', specialty: 'Психиатр', cabinet: '501', experience: '22 года', schedule: '10:00–16:00', days: 'Вт, Чт' },
+            { name: 'Григорьев Олег Владимирович', specialty: 'Онколог', cabinet: '503', experience: '19 лет', schedule: '08:00–13:00', days: 'Пн, Ср' }
+        ];
+
+        // ===== ДАННЫЕ =====
+        function generateInitialData() {
+            const users = [
+                { login: 'admin', password: '1234', role: 'admin', fio: 'Рукосуева Софья Сергеевна', birth: '1985-01-01' },
+                { login: 'user', password: '1234', role: 'patient', fio: 'Смирнов Алексей Владимирович', birth: '1990-05-15', phone: '+7 (999) 123-45-67' }
+            ];
+            const usedLogins = new Set(['admin', 'user']);
+            for (let i = 0; i < 100; i++) {
+                const fio = PATIENT_NAMES[i % PATIENT_NAMES.length] + (i >= PATIENT_NAMES.length ? ' ' + (i + 1) : '');
+                let login = 'patient' + (i + 1);
+                while (usedLogins.has(login)) login += '_';
+                usedLogins.add(login);
+                const year = 1950 + (i % 50);
+                const month = String((i % 12) + 1).padStart(2, '0');
+                const day = String((i % 28) + 1).padStart(2, '0');
+                users.push({ login, password: '1234', role: 'patient', fio, birth: `${year}-${month}-${day}`, phone: '+7 (999) ' + String(1000000 + i).slice(1) });
+            }
+            const appointments = [];
+            for (let i = 0; i < 60; i++) {
+                const p = users[2 + (i % 100)];
+                const d = DOCTORS[i % DOCTORS.length];
+                const date = `2026-${String((i % 12) + 1).padStart(2,'0')}-${String((i % 28) + 1).padStart(2,'0')}`;
+                const hour = 9 + (i % 8);
+                appointments.push({ id: Date.now() + i, login: p.login, doctor: d.name.split(' ')[0] + ' ' + d.name.split(' ')[1][0] + '.' + d.name.split(' ')[2][0] + '.', specialty: d.specialty, date, time: `${String(hour).padStart(2,'0')}:00`, cabinet: d.cabinet });
+            }
+            const records = [];
+            const diagnoses = ['ОРВИ','Гипертония I степени','Гастрит','Остеохондроз','Ангина','Бронхит','Мигрень','Аллергия','Пневмония','Артрит'];
+            for (let i = 0; i < 80; i++) {
+                const p = users[2 + (i % 100)];
+                const d = DOCTORS[i % DOCTORS.length];
+                records.push({
+                    id: Date.now() + 1000 + i, login: p.login,
+                    date: `2026-${String((i % 12) + 1).padStart(2,'0')}-${String((i % 28) + 1).padStart(2,'0')}`,
+                    doctor: d.name.split(' ')[0] + ' ' + d.name.split(' ')[1][0] + '.' + d.name.split(' ')[2][0] + '.',
+                    specialty: d.specialty, diagnosis: diagnoses[i % diagnoses.length],
+                    treatment: 'Медикаментозное лечение, режим, повторный приём', notes: 'Рекомендован покой'
+                });
+            }
+            // Добавим пару записей пользователю user
+            records.push({ id: 90001, login: 'user', date: '2026-10-15', doctor: 'Иванов И.И.', specialty: 'Терапевт', diagnosis: 'ОРВИ', treatment: 'Постельный режим, обильное питьё', notes: 'Повторный приём через 5 дней' });
+            appointments.push({ id: 90002, login: 'user', doctor: 'Иванов И.И.', specialty: 'Терапевт', date: '2026-11-01', time: '10:00', cabinet: '101' });
+
+            return {
+                users, appointments, records,
+                finance: [
+                    { name: 'Бюджетное финансирование', value: '45 000 000 ₽' },
+                    { name: 'ОМС (обязательное мед. страхование)', value: '28 500 000 ₽' },
+                    { name: 'Платные услуги', value: '12 300 000 ₽' },
+                    { name: 'Спонсорская помощь', value: '3 200 000 ₽' },
+                    { name: 'Гранты и субсидии', value: '5 000 000 ₽' }
+                ],
+                phones: [
+                    { name: 'Приемная главного врача', value: '+7 (39546) 5-06-23' },
+                    { name: 'Регистратура', value: '+7 (39546) 5-25-77' },
+                    { name: 'Коммутатор', value: '+7 (39546) 5-32-04' },
+                    { name: 'Скорая помощь', value: '103' },
+                    { name: 'Вызов врача на дом', value: '+7 (39546) 5-25-78' },
+                    { name: 'Платные услуги', value: '+7 (39546) 5-25-79' },
+                    { name: 'Отдел кадров', value: '+7 (39546) 5-06-24' },
+                    { name: 'Техническая поддержка', value: '+7 (39546) 5-32-05' }
+                ],
+                evacText: `        ПЛАН ЭВАКУАЦИИ ЧЕРЕМХОВСКОЙ ГОРОДСКОЙ БОЛЬНИЦЫ
+        =================================================
+
+        ЗДАНИЕ А (главный корпус, 5 этажей)
+        ------------------------------------
+        Этаж 1: Выход через главный вход (восточная сторона)
+                Выход через запасной вход (западная сторона)
+        Этаж 2: Лестница №1 → 1 этаж → главный вход
+                Лестница №2 → 1 этаж → западный выход
+        Этаж 3: Лестница №1 → 2 этаж → главный вход
+                Лестница №2 → 2 этаж → западный выход
+        Этаж 4: Лестница №1 → 3 этаж → главный вход
+                Лестница №2 → 3 этаж → западный выход
+        Этаж 5: Лестница №1 → 4 этаж → главный вход
+                Лестница №2 → 4 этаж → западный выход
+
+        ЗДАНИЕ Б (поликлиника, 3 этажа)
+        ---------------------------------
+        Этаж 1: Выход через центральный вход
+        Этаж 2: Лестница → 1 этаж → центральный вход
+        Этаж 3: Лестница → 2 этаж → 1 этаж → центральный вход
+
+        МЕСТА СБОРА:
+        - Площадка перед главным входом (здание А)
+        - Парковка (здание Б)
+
+        ТЕЛЕФОНЫ ЭКСТРЕННЫХ СЛУЖБ:
+        Пожарная охрана: 101
+        Полиция: 102
+        Скорая помощь: 103
+        Единая служба спасения: 112`
+            };
+        }
+
+        function getData() {
+            const raw = localStorage.getItem('hospital_data_v3');
+            if (raw) {
+                try { const d = JSON.parse(raw); if (d.users && d.users.length >= 100) return d; } catch(e) {}
+            }
+            const initial = generateInitialData();
+            localStorage.setItem('hospital_data_v3', JSON.stringify(initial));
+            return initial;
+        }
+        function saveData(data) { localStorage.setItem('hospital_data_v3', JSON.stringify(data)); }
+
+        let currentUser = null;
+        try { const saved = localStorage.getItem('current_user'); if (saved) currentUser = JSON.parse(saved); } catch(e) {}
+        function setCurrentUser(user) {
+            currentUser = user;
+            if (user) localStorage.setItem('current_user', JSON.stringify(user));
+            else localStorage.removeItem('current_user');
+        }
+
+        // ===== НАВИГАЦИЯ =====
+        const pages = document.querySelectorAll('.page');
+        const navLinks = document.querySelectorAll('#mainNav a[data-page]');
+
+        function showPage(pageId) {
+            pages.forEach(p => p.classList.remove('active'));
+            const target = document.getElementById('page-' + pageId);
+            if (target) target.classList.add('active');
+            window.scrollTo(0, 0);
+            navLinks.forEach(a => a.classList.toggle('active', a.dataset.page === pageId));
+            if (pageId === 'dashboard') { if (!currentUser) { showPage('auth'); return; } renderDashboard(); }
+            if (pageId === 'hospital') renderHospital();
+            if (pageId === 'doctors') renderDoctors();
+            if (pageId === 'schedule') renderSchedule();
+            if (pageId === 'departments') renderDepartments(1);
+        }
+
+        document.body.addEventListener('click', (e) => {
+            const trigger = e.target.closest('[data-page]');
+            if (trigger) { e.preventDefault(); showPage(trigger.dataset.page); }
+        });
+
+        // ===== ШАПКА =====
+        function updateNav() {
+            const navAuth = document.getElementById('navAuth');
+            const navDashboard = document.getElementById('navDashboard');
+            const userBadge = document.getElementById('userBadge');
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (currentUser) {
+                navAuth.style.display = 'none';
+                navDashboard.style.display = 'inline';
+                userBadge.style.display = 'inline-block';
+                const parts = currentUser.fio.split(' ');
+                let short = parts[0];
+                if (parts[1]) short += ' ' + parts[1][0] + '.';
+                if (currentUser.role === 'admin') short += ' (главврач)';
+                userBadge.textContent = short;
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                navAuth.style.display = 'inline';
+                navDashboard.style.display = 'none';
+                userBadge.style.display = 'none';
+                logoutBtn.style.display = 'none';
+            }
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            setCurrentUser(null); updateNav(); showPage('home');
+        });
+
+        // ===== АВТОРИЗАЦИЯ =====
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const login = document.getElementById('loginInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            const msg = document.getElementById('loginMessage');
+            const data = getData();
+            const user = data.users.find(u => u.login === login && u.password === password);
+            if (user) {
+                setCurrentUser(user);
+                msg.className = 'message success';
+                msg.textContent = '✅ Вход выполнен!';
+                updateNav();
+                setTimeout(() => { showPage('dashboard'); msg.textContent = ''; }, 500);
+            } else {
+                msg.className = 'message error';
+                msg.textContent = '❌ Неверный логин или пароль';
+            }
+        });
+
+        document.getElementById('showRegister').addEventListener('click', () => {
+            document.getElementById('loginBlock').style.display = 'none';
+            document.getElementById('registerBlock').style.display = 'block';
+        });
+        document.getElementById('showLogin').addEventListener('click', () => {
+            document.getElementById('registerBlock').style.display = 'none';
+            document.getElementById('loginBlock').style.display = 'block';
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const login = document.getElementById('regLogin').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const fio = document.getElementById('regFio').value.trim();
+            const birth = document.getElementById('regBirth').value;
+            const msg = document.getElementById('registerMessage');
+            const data = getData();
+            if (data.users.some(u => u.login === login)) {
+                msg.className = 'message error'; msg.textContent = '❌ Логин уже занят'; return;
+            }
+            if (password.length < 4) {
+                msg.className = 'message error'; msg.textContent = '❌ Пароль не менее 4 символов'; return;
+            }
+            const newUser = { login, password, role: 'patient', fio, birth, phone: '' };
+            data.users.push(newUser); saveData(data);
+            msg.className = 'message success'; msg.textContent = '✅ Регистрация успешна! Входим...';
+            setTimeout(() => { setCurrentUser(newUser); updateNav(); showPage('dashboard'); }, 800);
+        });
+
+        // ===== КАБИНЕТ =====
+        function renderDashboard() {
+            const container = document.getElementById('dashboardContent');
+            if (!currentUser) { container.innerHTML = '<p style="padding:40px;text-align:center;">Войдите в систему.</p>'; return; }
+            if (currentUser.role === 'admin') renderAdminDashboard(container);
+            else renderPatientDashboard(container);
+        }
+
+        function renderPatientDashboard(container) {
+            const data = getData();
+            const myAppointments = data.appointments.filter(a => a.login === currentUser.login);
+            const myRecords = data.records.filter(r => r.login === currentUser.login);
+            let html = `
+                <h1>Личный кабинет</h1>
+                <span class="role-tag">Пациент</span>
+                <div class="info-grid">
+                    <div class="info-card"><div class="label">ФИО</div><div class="value">${currentUser.fio}</div></div>
+                    <div class="info-card"><div class="label">Дата рождения</div><div class="value">${currentUser.birth || '—'}</div></div>
+                    <div class="info-card"><div class="label">Телефон</div><div class="value">${currentUser.phone || '—'}</div></div>
+                </div>`;
+            let doctorOptions = DOCTORS.map(d =>
+                `<option value="${d.name}|${d.specialty}|${d.cabinet}">${d.name} — ${d.specialty}</option>`
+            ).join('');
+            html += `<div class="section-title">📅 Запись на приём</div>
+                <div class="booking-form">
+                    <div class="form-group"><label>Врач</label><select id="bookDoctorSelect"><option value="">— Выберите —</option>${doctorOptions}</select></div>
+                    <div class="form-group"><label>Дата</label><input type="date" id="bookDate"></div>
+                    <div class="form-group"><label>Время</label><input type="time" id="bookTime" value="10:00"></div>
+                    <button class="btn-submit" id="bookSubmit">Записаться</button>
+                    <div class="message" id="bookMessage"></div>
+                </div>`;
+            html += `<div class="section-title">📋 Мои записи на приём</div>`;
+            if (myAppointments.length === 0) html += `<div class="empty-state">У вас пока нет записей.</div>`;
+            else myAppointments.forEach(a => {
+                html += `<div class="appointment-item"><div class="date">${a.date} в ${a.time}</div><div class="doctor">${a.doctor} — ${a.specialty}</div><div class="details">Кабинет ${a.cabinet}</div><button class="btn-danger cancel-appointment" data-id="${a.id}">Отменить</button></div>`;
+            });
+            html += `<div class="section-title">🏥 Моя медицинская карта</div>`;
+            if (myRecords.length === 0) html += `<div class="empty-state">Записей нет.</div>`;
+            else myRecords.forEach(r => {
+                html += `<div class="record-item"><div class="date">${r.date}</div><div class="doctor">${r.doctor} — ${r.specialty}</div><div class="details"><strong>Диагноз:</strong> ${r.diagnosis}</div><div class="details"><strong>Лечение:</strong> ${r.treatment}</div><div class="details"><strong>Примечания:</strong> ${r.notes}</div></div>`;
+            });
+            container.innerHTML = html;
+            document.getElementById('bookSubmit').addEventListener('click', () => {
+                const val = document.getElementById('bookDoctorSelect').value;
+                const date = document.getElementById('bookDate').value;
+                const time = document.getElementById('bookTime').value;
+                const msg = document.getElementById('bookMessage');
+                if (!val || !date || !time) { msg.className = 'message error'; msg.textContent = '❌ Заполните все поля'; return; }
+                const [doctor, specialty, cabinet] = val.split('|');
+                const newData = getData();
+                newData.appointments.push({ id: Date.now(), login: currentUser.login, doctor, specialty, date, time, cabinet });
+                saveData(newData);
+                msg.className = 'message success'; msg.textContent = '✅ Вы записаны!';
+                setTimeout(() => renderDashboard(), 600);
+            });
+            document.querySelectorAll('.cancel-appointment').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.dataset.id);
+                    const newData = getData();
+                    newData.appointments = newData.appointments.filter(a => a.id !== id);
+                    saveData(newData); renderDashboard();
+                });
+            });
+        }
+
+        // ===== КАБИНЕТ АДМИНА =====
+        function renderAdminDashboard(container) {
+            const data = getData();
+            const patients = data.users.filter(u => u.role === 'patient');
+            let html = `
+                <h1>Панель главного врача</h1>
+                <span class="role-tag admin">Администратор</span>
+                <div class="info-grid">
+                    <div class="info-card"><div class="label">ФИО</div><div class="value">${currentUser.fio}</div></div>
+                    <div class="info-card"><div class="label">Всего пациентов</div><div class="value">${patients.length}</div></div>
+                    <div class="info-card"><div class="label">Всего записей</div><div class="value">${data.appointments.length}</div></div>
+                </div>`;
+            html += `<div class="section-title">👥 Пациенты (${patients.length})</div>`;
+            html += `<div style="padding:0 0 15px;"><input type="text" id="adminSearchPatient" placeholder="🔍 Поиск пациента по ФИО или логину..." style="width:100%;padding:12px 15px;border-radius:8px;border:2px solid transparent;background:var(--bg-card);color:white;font-size:1rem;"></div>`;
+            html += `<div id="patientTableWrap"></div>`;
+            html += `<div class="section-title">📅 Все записи на приём <button class="btn btn-sm" id="adminAddAppointment">➕ Добавить</button></div>`;
+            html += `<div id="appTableWrap"></div>`;
+            container.innerHTML = html;
+
+            function renderPatients(filter = '') {
+                const filtered = patients.filter(p => !filter || p.fio.toLowerCase().includes(filter) || p.login.toLowerCase().includes(filter));
+                const wrap = document.getElementById('patientTableWrap');
+                if (filtered.length === 0) { wrap.innerHTML = `<div class="empty-state">Не найдено.</div>`; return; }
+                let h = `<table class="doctor-table"><thead><tr><th>ФИО</th><th>Дата рождения</th><th>Логин</th><th>Действия</th></tr></thead><tbody>`;
+                filtered.slice(0, 50).forEach(p => {
+                    h += `<tr><td>${p.fio}</td><td>${p.birth || '—'}</td><td>${p.login}</td><td><button class="btn btn-sm view-record" data-login="${p.login}" data-fio="${p.fio}">Мед. карта</button></td></tr>`;
+                });
+                h += `</tbody></table>`;
+                if (filtered.length > 50) h += `<p style="color:var(--text-muted);font-size:0.8rem;margin-top:8px;">Показано 50 из ${filtered.length}.</p>`;
+                wrap.innerHTML = h;
+                wrap.querySelectorAll('.view-record').forEach(btn => {
+                    btn.addEventListener('click', () => openPatientRecord(btn.dataset.login, btn.dataset.fio));
+                });
+            }
+            renderPatients();
+            document.getElementById('adminSearchPatient').addEventListener('input', function() { renderPatients(this.value.toLowerCase().trim()); });
+
+            function renderAppointments() {
+                const d = getData();
+                const wrap = document.getElementById('appTableWrap');
+                if (d.appointments.length === 0) { wrap.innerHTML = `<div class="empty-state">Записей нет.</div>`; return; }
+                let h = `<table class="doctor-table"><thead><tr><th>Пациент</th><th>Врач</th><th>Дата</th><th>Время</th><th>Действия</th></tr></thead><tbody>`;
+                d.appointments.slice(0, 80).forEach(a => {
+                    const patient = d.users.find(u => u.login === a.login);
+                    h += `<tr><td>${patient ? patient.fio : a.login}</td><td>${a.doctor} (${a.specialty})</td><td>${a.date}</td><td>${a.time}</td><td><button class="btn-edit edit-appointment" data-id="${a.id}">✏️</button><button class="btn-danger cancel-any-appointment" data-id="${a.id}">🗑️</button></td></tr>`;
+                });
+                h += `</tbody></table>`;
+                if (d.appointments.length > 80) h += `<p style="color:var(--text-muted);font-size:0.8rem;margin-top:8px;">Показано 80 из ${d.appointments.length}.</p>`;
+                wrap.innerHTML = h;
+                wrap.querySelectorAll('.edit-appointment').forEach(btn => btn.addEventListener('click', () => openAppointmentEdit(parseInt(btn.dataset.id))));
+                wrap.querySelectorAll('.cancel-any-appointment').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (!confirm('Удалить запись?')) return;
+                        const id = parseInt(btn.dataset.id);
+                        const nd = getData();
+                        nd.appointments = nd.appointments.filter(a => a.id !== id);
+                        saveData(nd); renderAppointments();
+                    });
+                });
+            }
+            renderAppointments();
+            document.getElementById('adminAddAppointment').addEventListener('click', () => openAppointmentEdit(null));
+        }
+
+        // ===== МЕД. КАРТА (АДМИН) =====
+        function openPatientRecord(login, fio) {
+            const data = getData();
+            const records = data.records.filter(r => r.login === login);
+            const modal = document.getElementById('recordModal');
+            const content = document.getElementById('modalRecordContent');
+            document.getElementById('modalTitle').textContent = 'Мед. карта: ' + fio;
+            let html = `<button class="btn btn-sm" id="addRecordBtn" style="margin-bottom:15px;">➕ Добавить запись</button>`;
+            if (records.length === 0) html += `<div class="empty-state">Записей нет.</div>`;
+            else records.forEach(r => {
+                html += `<div class="record-field"><div class="label">${r.date} — ${r.doctor} (${r.specialty})</div><div class="value"><strong>Диагноз:</strong> ${r.diagnosis}</div><div class="value"><strong>Лечение:</strong> ${r.treatment}</div><div class="value"><strong>Примечания:</strong> ${r.notes}</div><div style="margin-top:8px;"><button class="btn-edit edit-record" data-id="${r.id}">✏️</button><button class="btn-danger delete-record" data-id="${r.id}">🗑️</button></div></div>`;
+            });
+            content.innerHTML = html;
+            modal.classList.add('active');
+            document.getElementById('addRecordBtn').addEventListener('click', () => openRecordEdit(null, login));
+            content.querySelectorAll('.edit-record').forEach(btn => btn.addEventListener('click', () => openRecordEdit(parseInt(btn.dataset.id), login)));
+            content.querySelectorAll('.delete-record').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!confirm('Удалить запись?')) return;
+                    const id = parseInt(btn.dataset.id);
+                    const nd = getData();
+                    nd.records = nd.records.filter(r => r.id !== id);
+                    saveData(nd); openPatientRecord(login, fio);
+                });
+            });
+        }
+
+        function openRecordEdit(recordId, login) {
+            const data = getData();
+            const modal = document.getElementById('recordEditModal');
+            const title = document.getElementById('recordEditTitle');
+            if (recordId) {
+                const r = data.records.find(r => r.id === recordId);
+                title.textContent = 'Редактировать запись';
+                document.getElementById('editRecordId').value = r.id;
+                document.getElementById('editRecordDate').value = r.date;
+                document.getElementById('editRecordDoctor').value = r.doctor;
+                document.getElementById('editRecordSpecialty').value = r.specialty;
+                document.getElementById('editRecordDiagnosis').value = r.diagnosis;
+                document.getElementById('editRecordTreatment').value = r.treatment;
+                document.getElementById('editRecordNotes').value = r.notes;
+            } else {
+                title.textContent = 'Добавить запись';
+                document.getElementById('editRecordId').value = '';
+                document.getElementById('editRecordDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('editRecordDoctor').value = '';
+                document.getElementById('editRecordSpecialty').value = '';
+                document.getElementById('editRecordDiagnosis').value = '';
+                document.getElementById('editRecordTreatment').value = '';
+                document.getElementById('editRecordNotes').value = '';
+            }
+            document.getElementById('editRecordLogin').value = login;
+            modal.classList.add('active');
+        }
+
+        document.getElementById('recordEditForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editRecordId').value;
+            const login = document.getElementById('editRecordLogin').value;
+            const date = document.getElementById('editRecordDate').value;
+            const doctor = document.getElementById('editRecordDoctor').value.trim();
+            const specialty = document.getElementById('editRecordSpecialty').value.trim();
+            const diagnosis = document.getElementById('editRecordDiagnosis').value.trim();
+            const treatment = document.getElementById('editRecordTreatment').value.trim();
+            const notes = document.getElementById('editRecordNotes').value.trim();
+            const data = getData();
+            if (id) {
+                const r = data.records.find(r => r.id === parseInt(id));
+                if (r) { r.date = date; r.doctor = doctor; r.specialty = specialty; r.diagnosis = diagnosis; r.treatment = treatment; r.notes = notes; }
+            } else {
+                data.records.push({ id: Date.now(), login, date, doctor, specialty, diagnosis, treatment, notes });
+            }
+            saveData(data);
+            document.getElementById('recordEditModal').classList.remove('active');
+            const patient = data.users.find(u => u.login === login);
+            if (patient) openPatientRecord(login, patient.fio);
+        });
+        document.getElementById('recordEditClose').addEventListener('click', () => document.getElementById('recordEditModal').classList.remove('active'));
+
+        // ===== РЕДАКТИРОВАНИЕ ЗАПИСИ НА ПРИЁМ =====
+        function openAppointmentEdit(appId) {
+            const data = getData();
+            const modal = document.getElementById('appointmentEditModal');
+            const patients = data.users.filter(u => u.role === 'patient');
+            const patientSelect = document.getElementById('editAppPatient');
+            patientSelect.innerHTML = patients.slice(0, 100).map(p => `<option value="${p.login}">${p.fio} (${p.login})</option>`).join('');
+            const doctorSelect = document.getElementById('editAppDoctor');
+            doctorSelect.innerHTML = DOCTORS.map(d => `<option value="${d.name}|${d.specialty}|${d.cabinet}">${d.name} — ${d.specialty}</option>`).join('');
+            if (appId) {
+                const app = data.appointments.find(a => a.id === appId);
+                if (!app) return;
+                document.getElementById('editAppId').value = app.id;
+                document.getElementById('editAppPatient').value = app.login;
+                const targetVal = `${app.doctor}|${app.specialty}|${app.cabinet}`;
+                for (let opt of doctorSelect.options) { if (opt.value === targetVal) { doctorSelect.value = targetVal; break; } }
+                document.getElementById('editAppDate').value = app.date;
+                document.getElementById('editAppTime').value = app.time;
+            } else {
+                document.getElementById('editAppId').value = '';
+                document.getElementById('editAppDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('editAppTime').value = '10:00';
+            }
+            modal.classList.add('active');
+        }
+        document.getElementById('appointmentEditForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editAppId').value;
+            const login = document.getElementById('editAppPatient').value;
+            const doctorVal = document.getElementById('editAppDoctor').value;
+            const date = document.getElementById('editAppDate').value;
+            const time = document.getElementById('editAppTime').value;
+            const [doctor, specialty, cabinet] = doctorVal.split('|');
+            const data = getData();
+            if (id) {
+                const app = data.appointments.find(a => a.id === parseInt(id));
+                if (app) { app.login = login; app.doctor = doctor; app.specialty = specialty; app.cabinet = cabinet; app.date = date; app.time = time; }
+            } else {
+                data.appointments.push({ id: Date.now(), login, doctor, specialty, cabinet, date, time });
+            }
+            saveData(data);
+            document.getElementById('appointmentEditModal').classList.remove('active');
+            renderDashboard();
+        });
+        document.getElementById('appointmentEditClose').addEventListener('click', () => document.getElementById('appointmentEditModal').classList.remove('active'));
+
+        // ===== ОТДЕЛЕНИЯ =====
+        let deptPage = 1;
+        function renderDepartments(page) {
+            deptPage = page;
+            const perPage = 17;
+            const start = (page - 1) * perPage;
+            const items = DEPARTMENTS.slice(start, start + perPage);
+            const grid = document.getElementById('departmentsGrid');
+            grid.innerHTML = items.map(d => `<div class="dept-item">${d}</div>`).join('');
+            const totalPages = Math.ceil(DEPARTMENTS.length / perPage);
+            const pag = document.getElementById('departmentsPagination');
+            pag.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = i === page ? 'active' : '';
+                btn.addEventListener('click', () => renderDepartments(i));
+                pag.appendChild(btn);
+            }
+        }
+
+        // ===== ВРАЧИ =====
+        function renderDoctors() {
+            const list = document.getElementById('doctorsList');
+            if (list.children.length > 0) return;
+            list.innerHTML = DOCTORS.map(d => `
+                <div class="doctor-card">
+                    <h3>${d.name}</h3>
+                    <p class="specialty">${d.specialty}</p>
+                    <p class="info">Кабинет ${d.cabinet} · Стаж ${d.experience} · Приём: ${d.schedule}</p>
+                    <button class="btn btn-sm book-doctor" data-doctor-name="${d.name.split(' ')[0] + ' ' + d.name.split(' ')[1][0] + '.' + d.name.split(' ')[2][0] + '.'}" data-specialty="${d.specialty}" data-cabinet="${d.cabinet}">📅 Записаться</button>
+                </div>`).join('');
+            list.querySelectorAll('.book-doctor').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!currentUser) { showPage('auth'); return; }
+                    if (currentUser.role === 'admin') { alert('Администратор не может записываться.'); return; }
+                    const doctor = btn.dataset.doctorName;
+                    const specialty = btn.dataset.specialty;
+                    const cabinet = btn.dataset.cabinet;
+                    const data = getData();
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    const dateStr = tomorrow.toISOString().split('T')[0];
+                    data.appointments.push({ id: Date.now(), login: currentUser.login, doctor, specialty, date: dateStr, time: '10:00', cabinet });
+                    saveData(data);
+                    alert(`✅ Вы записаны к ${doctor} на ${dateStr} в 10:00`);
+                    showPage('dashboard');
+                });
+            });
+        }
+
+        // ===== РАСПИСАНИЕ =====
+        function renderSchedule() {
+            const tbody = document.getElementById('scheduleBody');
+            if (tbody.children.length > 0) return;
+            tbody.innerHTML = DOCTORS.map(d => `<tr><td>${d.name.split(' ')[0]} ${d.name.split(' ')[1][0]}.${d.name.split(' ')[2][0]}.</td><td>${d.specialty}</td><td>${d.cabinet}</td><td>${d.days}</td><td>${d.schedule}</td></tr>`).join('');
+        }
+
+        // ===== БОЛЬНИЦА =====
+        function renderHospital() {
+            const data = getData();
+            const isAdmin = currentUser && currentUser.role === 'admin';
+            const wrap = document.getElementById('hospitalAdminBlocks');
+            let html = '';
+
+            // Контакты
+            html += `<div class="info-block"><h2>📞 Справочные номера</h2>`;
+            data.phones.forEach(p => { html += `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><span>${p.name}</span><span style="color:var(--accent);font-weight:600;">${p.value}</span></div>`; });
+            if (isAdmin) html += `<div style="margin-top:15px;"><button class="btn btn-sm" id="editPhonesBtn">✏️ Редактировать</button></div>`;
+            html += `</div>`;
+
+            // Финансирование (только для админа)
+            if (isAdmin) {
+                html += `<div class="info-block"><h2>💰 Финансирование</h2>`;
+                data.finance.forEach(f => { html += `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><span>${f.name}</span><span style="color:var(--success);font-weight:600;">${f.value}</span></div>`; });
+                html += `<div style="margin-top:15px;"><button class="btn btn-sm" id="editFinanceBtn">✏️ Редактировать</button></div></div>`;
+            }
+
+            // План эвакуации
+            html += `<div class="info-block"><h2>🚨 План эвакуации</h2><div style="background:#0f1a35;border-radius:10px;padding:20px;font-family:monospace;font-size:0.85rem;line-height:1.5;color:var(--text-muted);white-space:pre;overflow-x:auto;">${data.evacText}</div>`;
+            if (isAdmin) html += `<div style="margin-top:15px;"><button class="btn btn-sm" id="editEvacBtn">✏️ Редактировать</button></div>`;
+            html += `</div>`;
+
+            wrap.innerHTML = html;
+
+            if (isAdmin) {
+                document.getElementById('editPhonesBtn').addEventListener('click', () => {
+                    const fields = document.getElementById('phoneFormFields');
+                    fields.innerHTML = data.phones.map((p, i) => `<div class="form-group"><label>${p.name}</label><input type="text" id="phoneInput${i}" value="${p.value}"></div>`).join('');
+                    document.getElementById('phoneEditModal').classList.add('active');
+                });
+                document.getElementById('editFinanceBtn').addEventListener('click', () => {
+                    const fields = document.getElementById('financeFormFields');
+                    fields.innerHTML = data.finance.map((f, i) => `<div class="form-group"><label>${f.name}</label><input type="text" id="finInput${i}" value="${f.value}"></div>`).join('');
+                    document.getElementById('financeEditModal').classList.add('active');
+                });
+                document.getElementById('editEvacBtn').addEventListener('click', () => {
+                    document.getElementById('evacEditText').value = data.evacText;
+                    document.getElementById('evacEditModal').classList.add('active');
+                });
+            }
+        }
+
+        // Модалки больницы (добавим в DOM, если их нет)
+        if (!document.getElementById('financeEditModal')) {
+            document.body.insertAdjacentHTML('beforeend', `
+                <div class="modal-overlay" id="financeEditModal"><div class="modal"><button class="modal-close" id="financeEditClose">×</button><h2>Редактировать финансирование</h2><form id="financeEditForm"><div id="financeFormFields"></div><button type="submit" class="btn-submit">Сохранить</button></form></div></div>
+                <div class="modal-overlay" id="phoneEditModal"><div class="modal"><button class="modal-close" id="phoneEditClose">×</button><h2>Редактировать номера</h2><form id="phoneEditForm"><div id="phoneFormFields"></div><button type="submit" class="btn-submit">Сохранить</button></form></div></div>
+                <div class="modal-overlay" id="evacEditModal"><div class="modal"><button class="modal-close" id="evacEditClose">×</button><h2>Редактировать план эвакуации</h2><form id="evacEditForm"><div class="form-group"><label>Текст плана</label><textarea id="evacEditText" rows="12" style="font-family:monospace;font-size:0.85rem;"></textarea></div><button type="submit" class="btn-submit">Сохранить</button></form></div></div>
+            `);
+            document.getElementById('financeEditForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const data = getData();
+                data.finance.forEach((f, i) => { const v = document.getElementById('finInput' + i).value; if (v) f.value = v; });
+                saveData(data);
+                document.getElementById('financeEditModal').classList.remove('active');
+                renderHospital();
+            });
+            document.getElementById('phoneEditForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const data = getData();
+                data.phones.forEach((p, i) => { const v = document.getElementById('phoneInput' + i).value; if (v) p.value = v; });
+                saveData(data);
+                document.getElementById('phoneEditModal').classList.remove('active');
+                renderHospital();
+            });
+            document.getElementById('evacEditForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const data = getData();
+                data.evacText = document.getElementById('evacEditText').value;
+                saveData(data);
+                document.getElementById('evacEditModal').classList.remove('active');
+                renderHospital();
+            });
+            document.querySelectorAll('.modal-overlay').forEach(o => {
+                o.addEventListener('click', (e) => { if (e.target === o) o.classList.remove('active'); });
+            });
+            document.getElementById('financeEditClose').addEventListener('click', () => document.getElementById('financeEditModal').classList.remove('active'));
+            document.getElementById('phoneEditClose').addEventListener('click', () => document.getElementById('phoneEditModal').classList.remove('active'));
+            document.getElementById('evacEditClose').addEventListener('click', () => document.getElementById('evacEditModal').classList.remove('active'));
+        }
+
+        // ===== ПОИСК =====
+        document.getElementById('searchDoctors').addEventListener('input', function() {
+            const q = this.value.toLowerCase().trim();
+            let count = 0;
+            document.querySelectorAll('#doctorsList .doctor-card').forEach(c => {
+                const match = c.textContent.toLowerCase().includes(q);
+                c.style.display = match ? 'block' : 'none';
+                if (match) count++;
+            });
+            document.getElementById('noResultDoctors').style.display = count === 0 ? 'block' : 'none';
+        });
+
+        // ===== ЗАКРЫТИЕ МОДАЛОК =====
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
+        });
+        document.getElementById('modalClose').addEventListener('click', () => document.getElementById('recordModal').classList.remove('active'));
+
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        updateNav();
+        getData();
+    </script>
+</body>
+</html>
